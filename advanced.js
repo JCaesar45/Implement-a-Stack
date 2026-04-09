@@ -244,12 +244,20 @@ function toggleTerminal() {
 }
 
 function showCodePanel() {
-  document.getElementById("code-vault").classList.remove("hidden");
+  const modal = document.getElementById("code-vault");
+  modal.classList.remove("hidden");
+  setTimeout(() => {
+    modal.classList.add("show");
+  }, 10);
   switchLang(0);
 }
 
 function hideCodePanel() {
-  document.getElementById("code-vault").classList.add("hidden");
+  const modal = document.getElementById("code-vault");
+  modal.classList.remove("show");
+  setTimeout(() => {
+    modal.classList.add("hidden");
+  }, 350);
 }
 
 let currentLang = 0;
@@ -314,12 +322,10 @@ function switchLang(n) {
 function copyCurrentCode() {
   const code = langCodes[currentLang];
   navigator.clipboard.writeText(code).then(() => {
-    const btns = document.querySelectorAll(".copy-btn");
-    btns.forEach((b) => {
-      const orig = b.textContent;
-      b.textContent = "COPIED ✓";
-      setTimeout(() => (b.textContent = orig), 1200);
-    });
+    const btn = document.querySelector(".copy-btn");
+    const orig = btn.textContent;
+    btn.textContent = "COPIED ✓";
+    setTimeout(() => (btn.textContent = orig), 1400);
   });
 }
 
@@ -429,6 +435,12 @@ window.onload = function () {
   }, 1000 / 60);
 
   renderStack();
+
+  // Extra safety for close button
+  const closeBtn = document.getElementById("close-vault");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", hideCodePanel);
+  }
 
   console.log(
     "%cNEONSTACK initialized — ready to impress everyone",
