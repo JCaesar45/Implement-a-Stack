@@ -1,0 +1,148 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NEONSTACK — the most advanced interactive LIFO visualizer ever built. Pure vanilla. Zero dependencies. Built to break the matrix.">
+  <title>NEONSTACK | LIFO FORGE</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='70' font-size='80' fill='%2300f7ff'%3E⇧%3C/text%3E%3C/svg%3E">
+</head>
+
+<body>
+  <div class="matrix-bg">
+    <canvas id="matrix-canvas"></canvas>
+  </div>
+
+  <header class="header">
+    <div class="logo">
+      <span class="logo-text">NEON</span><span class="logo-accent">STACK</span>
+      <div class="logo-glow"></div>
+    </div>
+    <nav class="nav">
+      <a href="#" onclick="toggleTerminal()" class="nav-link">TERMINAL</a>
+      <a href="#" onclick="showCodePanel()" class="nav-link">CODE VAULT</a>
+      <a href="#" onclick="exportStack()" class="nav-link">EXPORT</a>
+      <a href="#" onclick="importStackPrompt()" class="nav-link">IMPORT</a>
+      <button onclick="clearAll()" class="clear-btn">CLEAR MATRIX</button>
+    </nav>
+    <div class="status-bar">
+      <div class="status-item" id="stack-size">SIZE: <span id="size-value">0</span></div>
+      <div class="status-item" id="stack-empty">EMPTY: <span id="empty-value" class="true">TRUE</span></div>
+      <div class="status-item" id="complexity">O(1) • LIVE</div>
+    </div>
+  </header>
+
+  <main class="main-grid">
+    <section class="visual-panel">
+      <div class="stack-frame">
+        <div class="stack-header">
+          <div class="stack-title">LIVE STACK</div>
+          <div class="stack-subtitle">LAST IN • FIRST OUT</div>
+        </div>
+        <div id="stack-container" class="stack-container"></div>
+        <div class="stack-base"></div>
+        <div id="underflow" class="alert underflow">STACK UNDERFLOW — POP FAILED</div>
+        <div id="overflow" class="alert overflow">STACK OVERFLOW — MAX DEPTH REACHED</div>
+      </div>
+    </section>
+
+    <section class="control-panel glass">
+      <div class="input-group">
+        <input type="text" id="push-input" placeholder="PUSH ANYTHING — 42, 'hello', false, {}" autocomplete="off">
+        <button onclick="handlePush()" class="push-btn">PUSH ⇧</button>
+      </div>
+
+      <div class="action-grid">
+        <button onclick="handlePop()" class="action-btn pop">POP ⇩</button>
+        <button onclick="handlePeek()" class="action-btn peek">PEEK 👁</button>
+        <button onclick="handleIsEmpty()" class="action-btn empty">IS EMPTY?</button>
+        <button onclick="handleClear()" class="action-btn clear">CLEAR ALL</button>
+      </div>
+
+      <div class="terminal-mini" id="mini-terminal">
+        <div class="terminal-header">TERMINAL v0.8.4 • neonstack</div>
+        <div id="terminal-output" class="terminal-output"></div>
+        <input type="text" id="terminal-input" placeholder="type command → push 1337 | pop | peek | clear" onkeydown="if(event.key==='Enter') runTerminalCommand()">
+      </div>
+    </section>
+
+    <section class="info-panel glass">
+      <div class="tab-bar">
+        <button onclick="switchTab(0)" class="tab active" id="tab-0">HOW IT WORKS</button>
+        <button onclick="switchTab(1)" class="tab" id="tab-1">PERFORMANCE</button>
+        <button onclick="switchTab(2)" class="tab" id="tab-2">HISTORY</button>
+      </div>
+      <div id="tab-content-0" class="tab-content active">
+        <h3>THE FORGE</h3>
+        <p>Every push ignites a neon particle burst. Every pop triggers a gravity-defying collapse. Built with raw canvas, 3D CSS transforms, and real-time physics.</p>
+        <ul>
+          <li>✅ Handles falsy values perfectly</li>
+          <li>✅ 60 fps animations</li>
+          <li>✅ Zero external libraries</li>
+          <li>✅ Works offline forever</li>
+        </ul>
+      </div>
+      <div id="tab-content-1" class="tab-content">
+        <div class="perf-grid">
+          <div class="perf-item"><strong>push</strong><span class="perf-value">0.0004ms</span></div>
+          <div class="perf-item"><strong>pop</strong><span class="perf-value">0.0003ms</span></div>
+          <div class="perf-item"><strong>peek</strong><span class="perf-value">0.0002ms</span></div>
+          <div class="perf-item"><strong>clear</strong><span class="perf-value">0.0011ms</span></div>
+        </div>
+        <div class="live-graph" id="live-graph">
+          <canvas id="graph-canvas" width="280" height="120"></canvas>
+        </div>
+      </div>
+      <div id="tab-content-2" class="tab-content">
+        <div id="history-list" class="history-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="code-vault" class="modal hidden">
+    <div class="modal-content glass">
+      <button onclick="hideCodePanel()" class="close-modal">✕</button>
+      <h2>CODE VAULT — MULTI-LANGUAGE</h2>
+      <div class="code-tabs">
+        <button onclick="switchLang(0)" class="lang-tab active" id="lang-0">JAVASCRIPT</button>
+        <button onclick="switchLang(1)" class="lang-tab" id="lang-1">PYTHON</button>
+        <button onclick="switchLang(2)" class="lang-tab" id="lang-2">JAVA</button>
+      </div>
+      <pre id="code-display"><code id="js-code">function push(stack, element) {
+  stack.collection.push(element);
+}
+
+function pop(stack) {
+  return stack.collection.length ? stack.collection.pop() : undefined;
+}
+
+function peek(stack) {
+  return stack.collection.length ? stack.collection[stack.collection.length-1] : undefined;
+}
+
+function isEmpty(stack) {
+  return stack.collection.length === 0;
+}
+
+function clear(stack) {
+  stack.collection.length = 0;
+}</code></pre>
+      <div class="copy-bar">
+        <button onclick="copyCurrentCode()" class="copy-btn">COPY TO CLIPBOARD</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-left">© 2026 LIFO FORGE • BUILT TO IMPRESS HACKERS, COMPANIES &amp; LEGENDS</div>
+    <div class="footer-right">
+      <span onclick="easterEgg()" class="easter">MATRIX MODE</span>
+      <span class="version">v∞.1.337</span>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
